@@ -1,0 +1,45 @@
+# Phone book used to turn app hostnames into IP addresses at request time.
+# Answers are remembered for 30 seconds.
+resolver 1.1.1.1 valid=30s;
+
+# One log line per request: who called, the X-Forwarded-For chain,
+# which backend was chosen, what was asked, and the result.
+log_format lb '$remote_addr xff="$http_x_forwarded_for" -> $backend '
+              '"$request" $status';
+access_log /dev/stdout lb;
+
+# Coin flip per request: ~50% to app 1, the rest to app 2.
+# ${APP1_HOST} / ${APP2_HOST} come from environment variables (hostnames only,
+# no https://). $request_id is a built-in Nginx variable, left untouched.
+split_clients "$request_id" $backend {
+    50% "${APP1_HOST}";
+    *   "${APP2_HOST}";
+}
+
+server {
+    listen ${PORT};
+
+    # Health check endpoint for the host platform.
+    location = /healthz {
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location / {
+        # Variable in proxy_pass => Nginx resolves DNS at request time via `resolver`.
+        proxy_pass https://$backend;
+
+        # Talk TLS to the backend using its own hostname.
+        proxy_ssl_server_name on;
+        proxy_ssl_name $backend;
+
+        # Free hosts serve many apps per address; Host tells them which one we want.
+        proxy_set_header Host $backend;
+
+        # Pass along the original client chain so the app's rate limiter can read it.
+        proxy_set_header X-Forwarded-For $http_x_forwarded_for;
+
+        proxy_connect_timeout 10s;
+        proxy_read_timeout 60s;
+    }
+}   
