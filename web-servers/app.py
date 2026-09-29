@@ -20,7 +20,7 @@ RATE_LIMIT_COUNT = 10  # 10 requests
 RATE_LIMIT_WINDOW = 60 # per 60 seconds
 
 # Establish a reusable Redis connection
-redis_client = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
+redis_client = redis.Redis(host=REDIS_URL, port=6379, decode_responses=True)
 
 @app.before_request
 def rate_limiter():
