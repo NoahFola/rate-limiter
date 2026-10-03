@@ -74,7 +74,6 @@ resource "render_web_service" "nginx" {
     docker = {
       repo_url        = var.repo_url
       branch          = var.branch
-      root_dir        = "load-balancing"
       dockerfile_path = var.dockerfile_path
       auto_deploy     = true
     }

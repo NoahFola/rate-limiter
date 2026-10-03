@@ -2,11 +2,23 @@
 # Answers are remembered for 30 seconds.
 resolver 1.1.1.1 valid=30s;
 
-# One log line per request: who called, the X-Forwarded-For chain,
-# which backend was chosen, what was asked, and the result.
-log_format lb '$remote_addr xff="$http_x_forwarded_for" -> $backend '
-              '"$request" $status';
-access_log /dev/stdout lb;
+# Structured JSON access log — one line per proxied request.
+# Fields mirror what the Flask app logs so they can be correlated easily.
+log_format lb_json escape=json
+  '{'
+    '"time":"$time_iso8601",'
+    '"remote_addr":"$remote_addr",'
+    '"xff":"$http_x_forwarded_for",'
+    '"backend":"$backend",'
+    '"method":"$request_method",'
+    '"uri":"$request_uri",'
+    '"status":$status,'
+    '"bytes_sent":$bytes_sent,'
+    '"request_time":$request_time,'
+    '"upstream_response_time":"$upstream_response_time"'
+  '}';
+access_log /dev/stdout lb_json;
+
 
 # Coin flip per request: ~50% to app 1, the rest to app 2.
 # ${APP1_HOST} / ${APP2_HOST} come from environment variables (hostnames only,
@@ -39,7 +51,11 @@ server {
         # Pass along the original client chain so the app's rate limiter can read it.
         proxy_set_header X-Forwarded-For $http_x_forwarded_for;
 
-        proxy_connect_timeout 10s;
+        proxy_connect_timeout 60s;
         proxy_read_timeout 60s;
+
+        # Retry on the other backend if the chosen one errors or times out.
+        proxy_next_upstream error timeout http_502 http_503 http_504;
+        proxy_next_upstream_tries 2;
     }
 }   
