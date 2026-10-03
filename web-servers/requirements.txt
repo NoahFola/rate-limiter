@@ -3,3 +3,5 @@ gunicorn
 redis
 psycopg2-binary
 python-dotenv
+structlog
+python-json-logger

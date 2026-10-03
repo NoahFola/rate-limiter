@@ -17,6 +17,12 @@ variable "render_owner_id" {
   type = string
 }
 
+variable "log_level" {
+  type        = string
+  default     = "INFO"
+  description = "Python log level for the Flask app (DEBUG, INFO, WARNING, ERROR)."
+}
+
 provider "render" {
   api_key = var.render_api_key
   owner_id = var.render_owner_id
@@ -43,6 +49,7 @@ resource "render_web_service" "app" {
   env_vars = {
     DATABASE_URL = { value = "postgresql://url_shortener_db_9r2p_user:izug309sJVuFsjFqmgjaDbf11AgIWFmg@dpg-datsfo2d0e5s73dc5kt0-a.oregon-postgres.render.com:5432/url_shortener_db_9r2p" }
     REDIS_URL    = { value = "rediss://red-datid1psrm7s738r1te0:DRYKvPUQpwJX32L1XXoLYkEdok9bU5HM@oregon-keyvalue.render.com:6379" }
+    LOG_LEVEL    = { value = var.log_level }
   }
 }
 
@@ -65,6 +72,7 @@ resource "render_web_service" "app2" {
   env_vars = {
     DATABASE_URL = { value = "postgresql://url_shortener_db_9r2p_user:izug309sJVuFsjFqmgjaDbf11AgIWFmg@dpg-datsfo2d0e5s73dc5kt0-a.oregon-postgres.render.com:5432/url_shortener_db_9r2p" }
     REDIS_URL    = { value = "rediss://red-datid1psrm7s738r1te0:DRYKvPUQpwJX32L1XXoLYkEdok9bU5HM@oregon-keyvalue.render.com:6379" }
+    LOG_LEVEL    = { value = var.log_level }
   }
 }
   

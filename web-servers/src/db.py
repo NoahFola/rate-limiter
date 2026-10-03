@@ -1,15 +1,26 @@
 # src/db.py
 import psycopg2
+
 from src.config import DATABASE_URL
+from src.logger import get_logger
+
+log = get_logger(__name__)
 
 
 def get_db_connection():
     """Open a new connection. The caller is responsible for closing it."""
-    return psycopg2.connect(DATABASE_URL)
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        log.debug("db_connection_opened")
+        return conn
+    except Exception:
+        log.error("db_connection_failed", exc_info=True)
+        raise
 
 
 def init_db():
     """Create the urls table if it doesn't exist yet."""
+    log.info("db_init_start")
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -22,8 +33,10 @@ def init_db():
             )
         """)
         conn.commit()      # success: save
+        log.info("db_schema_ensured")
     except Exception:
         conn.rollback()    # failure: undo
+        log.error("db_schema_failed", exc_info=True)
         raise              # re-raise so the error isn't hidden
     finally:
         cur.close()        # always close the cursor
