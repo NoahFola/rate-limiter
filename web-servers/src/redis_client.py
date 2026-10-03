@@ -14,11 +14,12 @@ def _redact_url(url: str) -> str:
     return re.sub(r"(?<=://)([^:]+):([^@]+)@", r"\1:***@", url)
 
 
+redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+
+# Best-effort connectivity check at startup — log only, never crash the app.
+# The rate_limiter already has fail-open behaviour for runtime Redis errors.
 try:
-    redis_client = redis.from_url(REDIS_URL, decode_responses=True)
-    # Verify connectivity eagerly so startup logs capture a broken Redis URL.
     redis_client.ping()
     log.info("redis_client_created", url=_redact_url(REDIS_URL))
 except redis.exceptions.RedisError:
-    log.error("redis_client_failed", url=_redact_url(REDIS_URL), exc_info=True)
-    raise
+    log.error("redis_unreachable_at_startup", url=_redact_url(REDIS_URL), exc_info=True)
