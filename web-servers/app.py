@@ -20,6 +20,13 @@ log = get_logger(__name__)
 def create_app() -> Flask:
     app = Flask(__name__)
 
+    # Initialise DB schema (Gunicorn skips the __main__ block below)
+    try:
+        init_db()
+    except Exception:
+        log.error("db_init_failed", exc_info=True)
+        # We don't raise here so the app still boots and we can diagnose
+
     # ── Rate limiter ────────────────────────────────────────────────────────
     app.before_request(rate_limiter)
 

@@ -47,7 +47,7 @@ resource "render_web_service" "app" {
   }
 
   env_vars = {
-    DATABASE_URL = { value = "postgresql://url_shortener_db_9r2p_user:izug309sJVuFsjFqmgjaDbf11AgIWFmg@dpg-datsfo2d0e5s73dc5kt0-a.oregon-postgres.render.com:5432/url_shortener_db_9r2p" }
+    DATABASE_URL = { value = "postgresql://postgres.jrotkyjigadwllfqugib:FOFsyTMhMoGTCeEv@aws-1-eu-central-1.pooler.supabase.com:5432/postgres" }
     REDIS_URL    = { value = "rediss://red-datid1psrm7s738r1te0:DRYKvPUQpwJX32L1XXoLYkEdok9bU5HM@oregon-keyvalue.render.com:6379" }
     LOG_LEVEL    = { value = var.log_level }
   }
@@ -70,7 +70,7 @@ resource "render_web_service" "app2" {
   }
 
   env_vars = {
-    DATABASE_URL = { value = "postgresql://url_shortener_db_9r2p_user:izug309sJVuFsjFqmgjaDbf11AgIWFmg@dpg-datsfo2d0e5s73dc5kt0-a.oregon-postgres.render.com:5432/url_shortener_db_9r2p" }
+    DATABASE_URL = { value = "postgresql://postgres.jrotkyjigadwllfqugib:FOFsyTMhMoGTCeEv@aws-1-eu-central-1.pooler.supabase.com:5432/postgres" }
     REDIS_URL    = { value = "rediss://red-datid1psrm7s738r1te0:DRYKvPUQpwJX32L1XXoLYkEdok9bU5HM@oregon-keyvalue.render.com:6379" }
     LOG_LEVEL    = { value = var.log_level }
   }
